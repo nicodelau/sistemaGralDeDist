@@ -5,7 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        {{-- <title>{{ config('app.name', 'Harinas San Miguel') }}</title> --}}
+
+        <title>Harinas San Miguel</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -47,6 +49,7 @@
             @media print {
                 #non-printable { display: none; }
                 #printable { display: flex; justify-content: center; }
+                #text-print { color: black; }
             }
 
         </style>

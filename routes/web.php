@@ -71,6 +71,8 @@ Route::get('/modificarCliente', [ClienteController::class, 'modifCliente'])->nam
 
 Route::get('/deleteCliente', [ClienteController::class, 'deleteCliente'])->name('deleteCliente');
 
+Route::get('/cuantoDebe', [ClienteController::class, 'cuantoDebe'])->name('cuantoDebe');
+
 // talonario
 
 Route::get('/guardarTalonario', [TalonarioController::class, 'guardarTalonario'])->name('guardarTalonario');
@@ -78,5 +80,7 @@ Route::get('/guardarTalonario', [TalonarioController::class, 'guardarTalonario']
 Route::get('/getCuenta', [TalonarioController::class, 'getCuenta'])->name('getCuenta');
 
 Route::get('/modificarTalonario', [TalonarioController::class, 'modificarTalonario'])->name('modificarTalonario');
+
+Route::get('/modificarTalonarioFromCuentas', [TalonarioController::class, 'modificarTalonarioFromCuentas'])->name('modificarTalonarioFromCuentas');
 
 require __DIR__.'/auth.php';

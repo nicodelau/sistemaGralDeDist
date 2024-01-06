@@ -21,11 +21,11 @@
             <div class="p-4" style="display: flex; align-items: center; justify-content: space-between;">
                 <div class="text-gray-500" id="non-printable">
                     <label class="text-gray-300" for="cliente">Cliente: </label>
-                    <select name="cliente" id="cliente" onchange="clienteChange(this)" class="allUnset" style="border: 2px solid white; border-radius: 15px; padding: 0 15px 0 15px;" required>
+                    <select name="cliente" id="cliente" onchange="clienteChange(this); cuantoDebe();" class="allUnset" style="border: 2px solid white; border-radius: 15px; padding: 0 15px 0 15px;" required>
                         {{$clientes = AppHelper::getAllClientes()}}
                             <option value='' disabled selected>Elija el cliente...</option>
                             @foreach ($clientes as $cliente)
-                                <option value='{{$cliente->nombre}}'">{{$cliente->nombre}}</option>
+                                <option value='{{$cliente->nombre}}'>{{$cliente->nombre}}</option>
                             @endforeach
                     </select>
                 </div>
@@ -59,8 +59,9 @@
                 </div>
 
                 <div id="non-printable">
-                    <x-primary-button onclick="agregarProducto()">Agregar Producto</x-primary-button>
+                    <x-primary-button onclick="agregarProducto(), saldoFinal()">Agregar Producto</x-primary-button>
                     <x-primary-button onclick="return printDiv('printableArea')">Imprimir</x-primary-button>
+                    {{-- cuando imprime tengo que calcular el total que debe un cliente para ponerlo como cuenta final --}}
                 </div>
 
             </div>
@@ -87,7 +88,15 @@
 
                     for (const key in productos) {
                         if (Object.hasOwnProperty.call(productos, key)) {
-                            if(key != 'unidad') {
+                            if(key == 'precio') {
+                                const element = productos[key];
+                                let th = document.createElement('th');
+                                th.setAttribute('class', 'dark:text-gray-100');
+                                th.setAttribute('scope', 'row');
+                                th.setAttribute('id', 'non-printable');
+                                th.innerText = element;
+                                tr.appendChild(th)
+                            } else if(key != 'unidad') {
                                 const element = productos[key];
                                 let th = document.createElement('th');
                                 th.setAttribute('class', 'dark:text-gray-100');
@@ -117,7 +126,7 @@
                     let precioTh3 = document.createElement('span');
                     precioTh3.setAttribute('class', 'escondido');
                     precioTh3.setAttribute('scope', 'row');
-                    precioTh3.setAttribute('id', 'printable');
+                    precioTh3.setAttribute('id', 'printable precioPrint');
                     precioTh3.innerText = precioPorProd;
                     precioTh3.setAttribute('name', 'precioPrint' + cantidadDeProductos.toString());
 
@@ -183,6 +192,34 @@
                     precio.text(precios[num - 1].value);
                 }
 
+                function cuantoDebe() {
+                    let clienteSpan = document.getElementById('clienteSpan');
+                    cliente = clienteSpan.innerText;
+
+                    $.ajax({
+                        url : "/cuantoDebe",
+                        type : 'GET',
+                        data: {
+                            cliente: cliente,
+                        },
+                        success : function(result){
+                            let saldoAnterior = document.getElementById('saldoAnterior');
+                            saldoAnterior.innerText = result;
+                            return;
+                        }
+                    });
+                }
+
+                function saldoFinal() {
+                    let saldoAnterior = document.getElementById('saldoAnterior');
+
+                    let totalSuma = document.getElementById('totalSuma');
+
+                    let saldoNuevo = document.getElementById('saldoNuevo');
+                    saldoNuevo.innerText = parseInt(saldoAnterior.innerText) + parseInt(totalSuma.innerText);
+
+                }
+
                 function printDiv(divId) {
                     var precios = document.querySelectorAll('#precios');
                     let savePrecios = [];
@@ -192,6 +229,9 @@
                     var printContents = document.getElementById(divId).innerHTML;
                     var originalContents = document.body.innerHTML;
                     document.body.innerHTML = printContents;
+                    for (let i = 0; i < savePrecios.length; i++) {
+                        document.querySelectorAll('#precios')[i].value = savePrecios[i];
+                    }
                     window.print();
                     document.body.innerHTML = originalContents;
                     for (let i = 0; i < savePrecios.length; i++) {
@@ -205,7 +245,7 @@
                 <thead class="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
                         <th scope="col" class="dark:text-gray-100">Id del producto</th>
-                        <th scope="col" class="dark:text-gray-100">Precio</th>
+                        <th scope="col" class="dark:text-gray-100" id="non-printable">Precio</th>
                         <th scope="col" class="dark:text-gray-100">Nombre</th>
                         <th scope="col" class="dark:text-gray-100">Unidad</th>
                         <th scope="col" class="dark:text-gray-100">Total</th>
@@ -217,8 +257,14 @@
                     </tr>
                 </tbody>
             </table>
-            <div class="text-white p-4">
-                Total: <span id='totalSuma'></span>
+            <div class="text-white p-4" id="text-print">
+                Total: <span id='totalSuma'>0</span>
+            </div>
+            <div class="text-white p-4" id="text-print">
+                Saldo Anterior: <span id='saldoAnterior'>0</span>
+            </div>
+            <div class="text-white p-4" id="text-print">
+                Saldo nuevo: <span id='saldoNuevo'>0</span>
             </div>
             <div id="non-printable">
                 <x-primary-button onclick="guardarTalonario()">Guardar Talonario</x-primary-button>
@@ -244,22 +290,40 @@
                         let out = {};
                         let productos = document.getElementById('tableRow' + i.toString());
                         let producto = productos.innerHTML;
-                        producto.replace(/escondido/g, "");
-                        producto.replace('<th class="dark:text-gray-100" id="non-printable" scope="row"><button onclick="eliminar(1)" name="id"><i class="fa-solid fa-trash"></i></button></th>', "");
-                        producto.replace(/class="text-white allUnset"/g, "class='escondido'");
-                        producto.replace(/id="printable" name="precioPrint1"/g, "id='precioPrint'");
+                        producto = producto.replace(/escondido/g, "");
+                        producto = producto.replace(`<th class="dark:text-gray-100" id="non-printable" scope="row"><button onclick="eliminar(` + i + `)" name="id"><i class="fa-solid fa-trash"></i></button></th>`, "");
+                        producto = producto.replace(`<th><input class='escondido' scope="row" id="precios" onkeyup="setTotal() newPrice(` + i + `)">`, "");
+
+                        producto = producto.replace(/<th class="dark:text-gray-100" scope="row">/g, "||");
+                        producto = producto.replace(/id="non-printable">/g, "||");
+                        producto = producto.replace(/<\/th>/g, "");
+                        producto = producto.replace(/<th>/g, "||");
+                        producto = producto.replace(/name="precioPrint/g, "");
+                        producto = producto.replace(`${i}">`, "||");
+
+                        producto = producto.replace(/<\/span>/g, "");
+                        producto = producto.replace(/<input class='escondido' scope=\"row\" id=\"precios\" onkeyup=\"setTotal();/g, "");
+                        producto = producto.replace(/class="text-white allUnset"/g, "class='escondido'");
+                        producto = producto.replace(/id="printable" name="precioPrint1"/g, "id='precioPrint'");
+                        producto = producto.split('||');
                         out.id = i;
-                        out.talonario = producto;
+                        producto[1] = producto[1].replace('<th class=\"dark:text-gray-100\" scope=\"row\" ', "");
+
+                        out.idProd = producto[1];
+                        out.precio = producto[2];
+                        out.nombre = producto[3];
+                        out.unidad = producto[4];
+                        out.total = producto[6];
+
                         datosTal.push(out);
                     }
 
-                    // datosParaGuardar.push(datosTal);
-                    // datosParaGuardar.push(nombreDelCliente);
-                    // datosParaGuardar.push(totalSuma);
                     let objectDate = new Date();
                     let day = objectDate.getDate();
                     let month = objectDate.getMonth();
                     let year = objectDate.getFullYear();
+
+                    // console.log(datosTal)
 
                     $.ajax({
                         url : " /guardarTalonario",
@@ -271,16 +335,9 @@
                             fecha: day + '/' + (month + 1) + '/' + year,
                         },
                         success : function(result){
-                            if(result = 1){
-                                Swal.fire({
-                                    text: "El talonario se guardo con exito!",
-                                    icon: "success"
-                                });
-                                return;
-                            }
                             Swal.fire({
-                                text: "Ah ocurrido un error!",
-                                icon: "error"
+                                text: "El talonario se guardo con exito!",
+                                icon: "success"
                             });
                             return;
                         },
