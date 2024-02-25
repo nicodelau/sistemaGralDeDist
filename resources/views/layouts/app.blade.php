@@ -61,6 +61,12 @@
         <script>
             function changeTheme() {
                 localStorage.theme == 'dark' ? localStorage.theme = 'light' : localStorage.theme = 'dark'
+                if(localStorage.theme == 'light') {
+                    document.documentElement.classList.add('invert');
+                } else {
+                    document.documentElement.classList.remove('invert');
+
+                }
                 location.reload();
 
             }

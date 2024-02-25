@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('listaDePrecios', function (Blueprint $table) {
+        Schema::create('talonario', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->string('precio');
-            $table->string('unidad');
+            $table->string('cliente');
+            $table->string('datosCompra');
+            $table->string('totalDeLaCompra');
+            $table->string('fechaCompra');
         });
     }
 
@@ -24,7 +25,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
-        Schema::dropIfExists('listaDePrecios');
+        Schema::dropIfExists('talonario');
+
     }
 };
