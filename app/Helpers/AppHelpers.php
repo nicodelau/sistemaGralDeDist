@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-class AppHelper
+class AppHelpers
 {
     public static function getAllClientes()
     {

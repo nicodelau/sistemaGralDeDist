@@ -35,12 +35,12 @@
                     </x-nav-link>
                 </div>
 
-                {{-- <div class="space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('stock')" :active="request()->routeIs('stock')">
-                        {{ __('Stock') }}
+                <div class="space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('calculoDeCostos')" :active="request()->routeIs('calculoDeCostos')">
+                        {{ __('Calculo de costos') }}
                     </x-nav-link>
                 </div>
-
+{{--
                 <div class="space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('facturas')" :active="request()->routeIs('facturas')">
                         {{ __('Facturas') }}

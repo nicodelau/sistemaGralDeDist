@@ -22,7 +22,7 @@
                 <div class="text-gray-500" id="non-printable">
                     <label class="text-gray-300" for="cliente">Cliente: </label>
                     <select name="cliente" id="cliente" onchange="clienteChange(this); cuantoDebe();" class="allUnset" style="border: 2px solid white; border-radius: 15px; padding: 0 15px 0 15px;" required>
-                        {{$clientes = AppHelper::getAllClientes()}}
+                        {{$clientes = App\Helpers\AppHelpers::getAllClientes()}}
                             <option value='' disabled selected>Elija el cliente...</option>
                             @foreach ($clientes as $cliente)
                                 <option value='{{$cliente->nombre}}'>{{$cliente->nombre}}</option>
@@ -47,7 +47,7 @@
                 <div id="non-printable">
                     <label class="text-gray-300" for="productos">Productos: </label>
                     <select name="productos" id="productos" class="allUnset" style="border: 2px solid white; border-radius: 15px; padding: 0 15px 0 15px;" required>
-                        {{$productos = AppHelper::getAllProductos()}}
+                        {{$productos = App\Helpers\AppHelpers::getAllProductos()}}
                             <option value='' disabled selected>Elija el producto...</option>
                             @foreach ($productos as $producto)
                                 <option value='{{json_encode($producto)}}'>{{$producto->nombre}}</option>
